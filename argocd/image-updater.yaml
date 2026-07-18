@@ -16,4 +16,4 @@ spec:
           imageName: dannybloodfallen/local-k8s-ai-agent
           commonUpdateSettings:
             updateStrategy: newest-build
-            allowTags: "regexp:^[0-9a-f]{7}$"
+            #allowTags: "regexp:^[0-9a-f]{7}$"

@@ -47,7 +47,7 @@ spec:
       serviceAccountName: ai-devops-api
       containers:
         - name: api
-          image: dannybloodfallen/local-k8s-ai-agent:v3
+          image: dannybloodfallen/local-k8s-ai-agent
           ports:
             - containerPort: 8000
           env:

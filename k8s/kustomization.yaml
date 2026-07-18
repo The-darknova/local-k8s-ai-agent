@@ -8,4 +8,4 @@ resources:
 # when a newer image is pushed to Docker Hub.
 images:
   - name: dannybloodfallen/local-k8s-ai-agent
-    newTag: 776a2f9
+#    newTag: v1
