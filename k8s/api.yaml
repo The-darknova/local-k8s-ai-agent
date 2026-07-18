@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-devops-api
+  namespace: ai-devops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ai-devops-api-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events", "services", "configmaps", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ai-devops-api-reader
+subjects:
+  - kind: ServiceAccount
+    name: ai-devops-api
+    namespace: ai-devops
+roleRef:
+  kind: ClusterRole
+  name: ai-devops-api-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-devops-api
+  namespace: ai-devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-devops-api
+  template:
+    metadata:
+      labels:
+        app: ai-devops-api
+    spec:
+      serviceAccountName: ai-devops-api
+      containers:
+        - name: api
+          image: dannybloodfallen/local-k8s-ai-agent:v3
+          ports:
+            - containerPort: 8000
+          env:
+            - name: OLLAMA_URL
+              value: "http://ollama:11434"
+            - name: MODEL
+              value: "mistral"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-devops-api
+  namespace: ai-devops
+spec:
+  selector:
+    app: ai-devops-api
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: ClusterIP
